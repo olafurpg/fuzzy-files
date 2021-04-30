@@ -1,4 +1,5 @@
 import React from "react";
+import { HighlightedText, HighlightedTextProps } from "./HighlightedText";
 import { useLocalStorage } from "./useLocalStorage";
 
 interface FuzzyFilesProps {
@@ -7,10 +8,14 @@ interface FuzzyFilesProps {
 
 export const FuzzyFiles: React.FunctionComponent<FuzzyFilesProps> = (props) => {
   const [query, setQuery] = useLocalStorage("fuzzy-files.query", "");
+  const start = new Date();
   const regexp = new RegExp(query, "g");
-  const MAX_RESULTS = 10;
+  const MAX_RESULTS = 100;
   const candidates: HighlightedTextProps[] = [];
   for (var i = 0; i < props.files.length; i++) {
+    if (candidates.length >= MAX_RESULTS) {
+      break;
+    }
     const file = props.files[i];
     const match = regexp.exec(file);
     if (match) {
@@ -24,10 +29,9 @@ export const FuzzyFiles: React.FunctionComponent<FuzzyFilesProps> = (props) => {
         ],
       });
     }
-    if (candidates.length > MAX_RESULTS) {
-      break;
-    }
   }
+  const end = new Date();
+  const elapsed = Math.max(0, end.getMilliseconds() - start.getMilliseconds());
 
   return (
     <>
@@ -36,52 +40,16 @@ export const FuzzyFiles: React.FunctionComponent<FuzzyFilesProps> = (props) => {
         onChange={(e) => setQuery(e.target.value)}
         value={query}
       ></input>
+      <p>
+        {candidates.length} results in {elapsed}ms
+      </p>
       <ul className="fuzzy-files-results">
         {candidates.map((f) => (
           <li key={f.text}>
-            <Highlighted {...f} />
+            <HighlightedText {...f} />
           </li>
         ))}
       </ul>
     </>
   );
-};
-
-interface RangePosition {
-  startOffset: number;
-  endOffset: number;
-}
-
-interface HighlightedTextProps {
-  text: string;
-  positions: RangePosition[];
-}
-const Highlighted: React.FunctionComponent<HighlightedTextProps> = (props) => {
-  const spans: JSX.Element[] = [];
-  let start = 0;
-  function pushSpan(
-    className: string,
-    startOffset: number,
-    endOffset: number
-  ): void {
-    if (startOffset >= endOffset) return;
-    const span = (
-      <span className={className}>
-        {props.text.substring(startOffset, endOffset)}
-      </span>
-    );
-    spans.push(span);
-  }
-  for (let i = 0; i < props.positions.length; i++) {
-    const pos = props.positions[i];
-    if (pos.startOffset > start) {
-      pushSpan("fuzzy-files-plaintext", start, pos.startOffset);
-      start = pos.endOffset;
-    }
-    pushSpan("fuzzy-files-highlighted", pos.startOffset, pos.endOffset);
-  }
-  pushSpan("fuzzy-files-plaintext", start, props.text.length);
-  console.log(props.positions);
-
-  return <>{spans}</>;
 };

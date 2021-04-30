@@ -1,11 +1,31 @@
 import React, { useEffect } from "react";
-import { LinuxFiles } from "./LinuxFiles";
 import { FuzzyFiles } from "./FuzzyFiles";
+import { FuzzySearch } from "./FuzzySearch";
+// import { LinuxFiles } from "./LinuxFiles";
+// import { ChromiumFiles } from "./ChromiumFiles";
+import { LinuxFiles } from "./LinuxFiles";
 
 interface ModalProps {
   show: boolean;
   onClose: () => void;
 }
+const all = [
+  "to/the/moon.jpg",
+  "business/crazy.txt",
+  "fuzzy/business.txt",
+  "haha/business.txt",
+  "lol/business.txt",
+];
+// const MAX = 100000;
+// const files = [];
+// for (var i = 0; i < MAX && i < LinuxFiles.length; i++) {
+//   files.push(LinuxFiles[i]);
+// }
+
+const search = new FuzzySearch(LinuxFiles);
+// const search = new FuzzySearch(LinuxFiles);
+// console.log(search.buckets);
+// console.log(search.search("t/moon"));
 
 export const Modal: React.FunctionComponent<ModalProps> = (props) => {
   useEffect(() => {
@@ -31,7 +51,7 @@ export const Modal: React.FunctionComponent<ModalProps> = (props) => {
           <h4 className="modal-title">Files</h4>
         </div>
         <div className="modal-body">
-          <FuzzyFiles files={LinuxFiles} />
+          <FuzzyFiles search={(e) => search.search(e)} />
         </div>
         <div className="modal-footer">
           <button className="button" onClick={props.onClose}>

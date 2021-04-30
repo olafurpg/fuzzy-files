@@ -41,7 +41,8 @@ export const FuzzyFiles: React.FunctionComponent<FuzzyFilesProps> = (props) => {
         value={query}
       ></input>
       <p>
-        {candidates.length} results in {elapsed}ms
+        {candidates.length} result{candidates.length !== 1 && "s"} in {elapsed}
+        ms
       </p>
       <ul className="fuzzy-files-results">
         {candidates.map((f) => (
